@@ -1,0 +1,405 @@
+<title>泰奶社群作戰排程</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap">
+<style>
+  /* 版面：固定頁首（KPI＋控制）＋ 可橫向捲動的五泳道時間軸；卡片可編輯、可搬移 */
+  :root{
+    --bg:#FBF6EC; --surface:#FFFFFF; --panel:#F4ECDA; --fg:#2B2119; --muted:#7C6A55; --line:#E7D9BE;
+    --gold:#B5852F; --red:#A8322C;
+    --th:#BE8A2E; --thtw:#B85A36; --kol:#9E2B25; --official:#2E7D83; --fp:#D21E6D;
+    --phase-press:#B85A36; --phase-launch:#A8322C; --phase-spread:#9A7A3A;
+    --radius:12px;
+    --f-body:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+    --f-head:"Noto Serif TC",Georgia,serif;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --bg:#15110E; --surface:#221C17; --panel:#2A2218; --fg:#F2E8D7; --muted:#AC9A81; --line:#3A3025;
+    --gold:#D8B063; --red:#E58566;
+    --th:#D4A54E; --thtw:#DB8A5F; --kol:#DA6A5E; --official:#5BB6BD; --fp:#F26BA0;
+    --phase-press:#DB8A5F; --phase-launch:#E58566; --phase-spread:#CDA860;
+    color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --bg:#15110E; --surface:#221C17; --panel:#2A2218; --fg:#F2E8D7; --muted:#AC9A81; --line:#3A3025;
+    --gold:#D8B063; --red:#E58566;
+    --th:#D4A54E; --thtw:#DB8A5F; --kol:#DA6A5E; --official:#5BB6BD; --fp:#F26BA0;
+    --phase-press:#DB8A5F; --phase-launch:#E58566; --phase-spread:#CDA860;
+    color-scheme:dark;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--fg); font-family:var(--f-body); line-height:1.5; }
+  .wrap{ padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px)); }
+
+  header.top{ position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--bg);
+    border-bottom:1px solid var(--line); }
+  body::before{ content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:21; background:var(--bg); }
+  .head-in{ padding-block:14px 12px; display:flex; flex-direction:column; gap:12px; }
+  .titlerow{ display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  h1{ font-family:var(--f-head); font-weight:900; font-size:clamp(19px,4.5vw,26px); margin:0; letter-spacing:.01em; }
+  h1 .x{ color:var(--red); }
+  .sub{ color:var(--muted); font-size:12.5px; }
+
+  .kpis{ display:flex; gap:8px; flex-wrap:wrap; }
+  .kpi{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:7px 11px; min-width:0; }
+  .kpi .n{ font-weight:900; font-size:18px; font-variant-numeric:tabular-nums; }
+  .kpi .l{ font-size:10.5px; color:var(--muted); letter-spacing:.02em; }
+  .kpi.total .n{ color:var(--red); }
+
+  .controls{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .lanes-toggle{ display:flex; gap:6px; flex-wrap:wrap; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--surface);
+    color:var(--fg); border-radius:999px; padding:5px 11px; font-size:12px; font-weight:700; cursor:pointer; user-select:none; }
+  .chip .dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+  .chip[aria-pressed="false"]{ opacity:.38; }
+  .spacer{ flex:1 1 auto; }
+  .btn{ border:1px solid var(--line); background:var(--surface); color:var(--fg); border-radius:999px;
+    padding:6px 13px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .btn:hover{ border-color:var(--gold); }
+  .btn.on{ background:var(--red); color:#fff; border-color:var(--red); }
+  .btn.cancel{ background:var(--gold); color:#fff; border-color:var(--gold); }
+  .btn:focus-visible,.chip:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+
+  .hint{ font-size:11.5px; color:var(--muted); }
+  .phases{ display:flex; gap:12px; flex-wrap:wrap; font-size:11px; color:var(--muted); align-items:center; }
+  .phases b{ color:var(--fg); }
+
+  /* timeline */
+  .scroll{ overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; padding-block:14px 26px; }
+  table{ border-collapse:separate; border-spacing:0; min-width:100%; }
+  th,td{ vertical-align:top; }
+  thead th{ position:sticky; top:0; z-index:3; background:var(--bg); padding:0 6px 8px; text-align:left; }
+  thead th.corner{ left:0; z-index:5; }
+  .lanecol{ position:sticky; left:0; z-index:2; background:var(--bg); width:92px; min-width:92px; padding-right:8px; }
+  .daycol{ width:168px; min-width:168px; }
+  .dhead{ border-bottom:2px solid var(--line); padding-bottom:6px; }
+  .dhead .d{ font-weight:900; font-size:14px; font-variant-numeric:tabular-nums; }
+  .dhead .wk{ font-size:10px; color:var(--muted); }
+  .dhead .ph{ display:inline-block; margin-top:3px; font-size:9.5px; font-weight:800; letter-spacing:.03em;
+    padding:1px 6px; border-radius:999px; color:#fff; }
+  td.cell{ padding:6px 5px; border-bottom:1px solid var(--line); }
+  td.cell.drop-hot{ background:color-mix(in srgb,var(--gold) 16%,transparent); outline:1.5px dashed var(--gold); outline-offset:-3px; border-radius:8px; }
+  .lanelabel{ padding:8px 6px 8px 0; border-bottom:1px solid var(--line); }
+  .lanelabel .nm{ font-weight:900; font-size:12.5px; display:flex; align-items:center; gap:6px; line-height:1.25; }
+  .lanelabel .nm .bar{ width:4px; height:16px; border-radius:2px; flex:none; }
+  .lanelabel .role{ font-size:10px; color:var(--muted); margin-top:2px; }
+
+  .card{ position:relative; background:var(--surface); border:1px solid var(--line); border-left-width:4px; border-radius:9px;
+    padding:7px 9px; margin-bottom:6px; }
+  .card .t{ font-size:12px; font-weight:700; line-height:1.4; padding-left:16px; }
+  .card .nt{ font-size:10.5px; color:var(--muted); margin-top:2px; line-height:1.4; padding-left:16px; }
+  .card.dragging{ opacity:.35; }
+  .card.sel-move{ outline:2px solid var(--gold); outline-offset:1px; }
+  /* 搬移把手：左上，常駐但低調 */
+  .mv{ position:absolute; top:6px; left:5px; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center;
+    border:none; background:var(--panel); color:var(--muted); border-radius:50%; font-size:10px; line-height:1; cursor:grab;
+    opacity:.55; padding:0; }
+  .card:hover .mv{ opacity:1; }
+  .mv:active{ cursor:grabbing; }
+  .card .rm{ display:none; }
+  .editing .card .t{ padding-right:16px; }
+  .editing .card .t,.editing .card .nt{ outline:1px dashed var(--line); outline-offset:2px; border-radius:3px; }
+  .editing .card .t:focus,.editing .card .nt:focus{ outline:1.5px solid var(--gold); }
+  .editing .card .rm{ display:inline-flex; position:absolute; top:4px; right:4px; width:18px; height:18px;
+    align-items:center; justify-content:center; border:none; background:var(--panel); color:var(--red);
+    border-radius:50%; font-size:12px; cursor:pointer; line-height:1; }
+  /* 放置區：移動模式時每格頂端出現 */
+  .dropzone{ display:none; width:100%; border:1.5px dashed var(--gold); background:color-mix(in srgb,var(--gold) 9%,transparent);
+    color:var(--gold); border-radius:8px; padding:6px 4px; font-size:10.5px; font-weight:700; text-align:center;
+    cursor:pointer; margin-bottom:6px; font-family:inherit; line-height:1.25; }
+  body.move-mode .dropzone{ display:block; }
+  body.move-mode .card:not(.sel-move){ opacity:.6; }
+  .add{ display:none; width:100%; border:1px dashed var(--line); background:transparent; color:var(--muted);
+    border-radius:8px; padding:5px; font-size:11px; cursor:pointer; font-family:inherit; }
+  .editing .add{ display:block; }
+  .add:hover{ border-color:var(--gold); color:var(--fg); }
+  .lane-hidden{ display:none; }
+
+  @media (max-width:460px){
+    .lanecol{ width:76px; min-width:76px; }
+    .daycol{ width:150px; min-width:150px; }
+  }
+</style>
+
+<header class="top">
+  <div class="wrap head-in">
+    <div class="titlerow">
+      <div>
+        <h1>泰奶社群作戰排程 <span class="x">·三環五線</span></h1>
+        <div class="sub">LAYA × ChaTraMue 手標泰奶聯名　|　12/2 – 12/20　|　三環五線 動態操作</div>
+      </div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="controls">
+      <div class="lanes-toggle" id="laneToggles"></div>
+      <span class="spacer"></span>
+      <button class="btn cancel" id="moveCancel" hidden>取消移動</button>
+      <button class="btn" id="editBtn" aria-pressed="false">編輯</button>
+      <button class="btn" id="copyBtn">複製排程</button>
+      <button class="btn" id="resetBtn">還原預設</button>
+    </div>
+    <div class="phases">
+      <span><b>節奏：</b></span>
+      <span>12/2 記者會（外·中環啟動）</span>
+      <span>12/3 上市（內環引爆·導購）</span>
+      <span>12/4–20 擴散（互相回收·長尾）</span>
+      <span class="hint">搬移：點卡片左上 <b>⇅</b> 再點目標日「放到這裡」；桌機也可直接拖曳卡片到其他格。</span>
+      <span class="hint" id="editHint" hidden>編輯模式：點卡片文字可改，✕ 刪除，＋ 新增；變更自動存在本機。</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="scroll">
+    <table id="grid"><thead id="ghead"></thead><tbody id="gbody"></tbody></table>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var LANES=[
+    {id:"th",      name:"外環｜泰國",        short:"泰國",        role:"手標泰方・泰國社群",    color:"var(--th)"},
+    {id:"thtw",    name:"中環｜台灣泰國人",  short:"台灣泰國人",  role:"在台泰生・泰國學生會", color:"var(--thtw)"},
+    {id:"kol",     name:"內環｜KOL＋KOC",    short:"KOL＋KOC",    role:"娘娘＋美食/旅遊 KOC",   color:"var(--kol)"},
+    {id:"official",name:"拉亞官方",          short:"拉亞官方",    role:"自有社群・導購・回收",  color:"var(--official)"},
+    {id:"fp",      name:"foodpanda 通路",    short:"foodpanda",  role:"平台曝光・免費兌換・導客", color:"var(--fp)"}
+  ];
+  var DAYS=[]; for(var i=2;i<=20;i++) DAYS.push(i);
+  var WK=["日","一","二","三","四","五","六"];
+  function wkOf(d){ return WK[new Date(2026,11,d).getDay()]; }
+  function phaseOf(d){ return d===2?"press":(d===3?"launch":"spread"); }
+  function phaseLabel(p){ return p==="press"?"記者會":p==="launch"?"上市":"擴散"; }
+  function phaseColor(p){ return p==="press"?"var(--phase-press)":p==="launch"?"var(--phase-launch)":"var(--phase-spread)"; }
+  function laneOf(id){ return LANES.find(function(l){return l.id===id;}); }
+  function laneShort(l){ return l.short||l.name.split("｜").pop(); }
+
+  var SEED=[
+    // 12/2 記者會日・啟動
+    ["official",2,"記者會現場限動直播","聯名正式公開貼文＋主視覺發布"],
+    ["official",2,"「泰誇張」梗預告","社群短梗啟動，預告明日上市"],
+    ["thtw",2,"在台泰國學生會 拍攝","實測花絮預告：泰國人即將認證"],
+    ["kol",2,"KOC 收到產品・預告","美食/旅遊 KOC 預告「明天上市」"],
+    ["th",2,"手標泰方官宣","泰國官方社群：在台灣與拉亞聯名"],
+    ["fp",2,"foodpanda 上架＋活動頁預告","聯名專區 banner；預告 12/3 免費兌換"],
+    // 12/3 上市日・內環引爆
+    ["kol",3,"娘娘 店內實測 Reels（主片）","最泰食評人認證，上市日上線"],
+    ["kol",3,"美食KOC 八款開箱","＋旅遊KOC「一口回曼谷」；限動接力"],
+    ["thtw",3,"在台泰國學生會 實測認證（主片）","在台泰人盲測；發布「在台泰國人認證」章"],
+    ["official",3,"上市洗版＋投票","泰奶豆漿 vs 拿鐵；Laya Now 導購"],
+    ["official",3,"「泰＿＿了」徵集啟動","泰好喝了／泰誇張了／泰上頭了"],
+    ["th",3,"泰國社群驚奇投放","「台灣竟然喝得到正宗手標」＋泰方轉發"],
+    ["fp",3,"泰奶豆漿 免費兌換開跑","foodpanda 限量兌換；社群同步導客"],
+    ["fp",3,"平台推播＋首頁曝光","pandapro 會員推播；泰奶聯名主題"],
+    // 擴散第一波
+    ["kol",4,"KOC 飲品評測","泰奶豆漿 / 泰奶拿鐵 專測"],
+    ["official",4,"KOC 內容轉發・精華整理",""],
+    ["thtw",4,"在台泰生 思鄉·家鄉味 短片",""],
+    ["th",4,"泰國網友反應截圖","回收至台灣社群與媒體"],
+    ["fp",4,"兌換熱況限動回收","「排隊兌換」實況 → 社群"],
+    ["kol",5,"旅遊KOC 場景化","「味蕾一秒到曼谷」"],
+    ["thtw",5,"台泰夫妻（KOC）家庭試吃","泰籍一方現場評點"],
+    ["official",5,"門市「店員一句話」口碑啟動","好喝記得幫我分享；UGC 轉發"],
+    ["fp",5,"外送加碼・加價購","買聯名送泰奶／加價購；平台曝光"],
+    ["kol",6,"美食KOC 八款排名／獵奇吃法",""],
+    ["official",6,"投票中期戰況限動",""],
+    ["th",6,"曼谷 vs 台灣 對照梗",""],
+    ["fp",6,"衝外送早餐榜單","foodpanda 早餐類排行；截圖回收"],
+    // 擴散第二波・回收
+    ["official",8,"公關回收貼文","「連泰國都在討論的台灣聯名」"],
+    ["th",8,"公關延伸稿","泰國社群熱議 → 台灣媒體"],
+    ["thtw",8,"泰籍達人／泰式餐廳老闆 點評",""],
+    ["kol",9,"旅遊線 KOC 第二波","隱藏吃法短影音"],
+    ["thtw",9,"「在台泰國人認證」章 二創徵集",""],
+    ["official",10,"八款精華 reels・投票結果","公布＋導購 Laya Now"],
+    ["kol",10,"美食KOC 長尾評測",""],
+    ["fp",10,"兌換中期成效・加碼預告","換量回報；平台優惠延伸"],
+    ["thtw",12,"「帶爸媽視訊看台灣有手標」溫情片",""],
+    ["official",12,"感謝在台泰國朋友認證（官方文）",""],
+    ["fp",12,"pandapro 專屬優惠","會員回購；泰奶聯名主題"],
+    // 延續・收尾
+    ["official",15,"中期成效限動・導購延續",""],
+    ["kol",15,"素人 UGC 精選轉發",""],
+    ["fp",15,"長尾外送優惠延續",""],
+    ["kol",17,"口碑長尾（KOC 補發）",""],
+    ["th",17,"收尾回收／延伸公關",""],
+    ["official",20,"檔期中段回顧・年節前預告",""],
+    ["thtw",20,"家鄉味回顧短片",""],
+    ["fp",20,"檔期外送成效回顧","兌換／外送數據回收"]
+  ];
+  function seedItems(){ return SEED.map(function(r,i){ return {id:"s"+i,lane:r[0],d:r[1],t:r[2],nt:r[3]||""}; }); }
+
+  var KEY="layaThaiSchedule_v3", LKEY="layaThaiLanes_v3";
+  var items=load(), hidden=loadLanes();
+  function load(){ try{ var s=localStorage.getItem(KEY); if(s){ var a=JSON.parse(s); if(Array.isArray(a)&&a.length) return a; } }catch(e){} return seedItems(); }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(items)); }catch(e){} }
+  function loadLanes(){ try{ var s=localStorage.getItem(LKEY); if(s) return JSON.parse(s)||{}; }catch(e){} return {}; }
+  function saveLanes(){ try{ localStorage.setItem(LKEY,JSON.stringify(hidden)); }catch(e){} }
+
+  var gbody=document.getElementById("gbody"), ghead=document.getElementById("ghead");
+  var moveCancelBtn=document.getElementById("moveCancel");
+  var editing=false, moving=null, dragId=null;
+
+  function renderHead(){
+    var tr=document.createElement("tr");
+    var corner=document.createElement("th"); corner.className="corner lanecol";
+    var lab=document.createElement("div"); lab.className="dhead"; lab.style.borderBottom="none";
+    lab.innerHTML='<span class="wk" style="font-weight:800;color:var(--muted)">環 ＼ 日期</span>';
+    corner.appendChild(lab); tr.appendChild(corner);
+    DAYS.forEach(function(d){
+      var th=document.createElement("th"); th.className="daycol";
+      var p=phaseOf(d);
+      th.innerHTML='<div class="dhead"><span class="d">12/'+d+'</span> <span class="wk">('+wkOf(d)+')</span>'+
+        '<br><span class="ph" style="background:'+phaseColor(p)+'">'+phaseLabel(p)+'</span></div>';
+      tr.appendChild(th);
+    });
+    ghead.innerHTML=""; ghead.appendChild(tr);
+  }
+
+  function moveItem(id,laneId,day){
+    var o=items.find(function(x){return x.id===id;}); if(!o) return;
+    o.lane=laneId; o.d=day; moving=null; dragId=null; save(); render();
+  }
+
+  function cardEl(it){
+    var lane=laneOf(it.lane);
+    var c=document.createElement("div"); c.className="card"; c.style.borderLeftColor=lane?lane.color:"var(--line)";
+    c.dataset.id=it.id;
+    if(moving===it.id) c.classList.add("sel-move");
+
+    // 搬移把手（常駐）
+    var mv=document.createElement("button"); mv.className="mv"; mv.type="button"; mv.textContent="⇅"; mv.title="搬移到其他日子";
+    mv.addEventListener("click",function(e){ e.stopPropagation(); moving=(moving===it.id)?null:it.id; applyMoveState(); });
+
+    // 桌機原生拖曳
+    c.setAttribute("draggable", editing?"false":"true");
+    c.addEventListener("dragstart",function(e){ moving=null; dragId=it.id; c.classList.add("dragging");
+      try{ e.dataTransfer.setData("text/plain",it.id); e.dataTransfer.effectAllowed="move"; }catch(_){} });
+    c.addEventListener("dragend",function(){ c.classList.remove("dragging"); dragId=null; clearHot(); });
+
+    var t=document.createElement("div"); t.className="t"; t.textContent=it.t; t.dataset.f="t";
+    var n=document.createElement("div"); n.className="nt"; n.textContent=it.nt; n.dataset.f="nt";
+    if(!it.nt && !editing) n.style.display="none";
+    var rm=document.createElement("button"); rm.className="rm"; rm.textContent="✕"; rm.title="刪除";
+    rm.addEventListener("click",function(){ items=items.filter(function(x){return x.id!==it.id;}); save(); render(); });
+    c.appendChild(mv); c.appendChild(rm); c.appendChild(t); c.appendChild(n);
+    [t,n].forEach(function(el){
+      el.addEventListener("blur",function(){
+        var obj=items.find(function(x){return x.id===it.id;}); if(!obj) return;
+        obj[el.dataset.f]=el.textContent.trim(); save();
+      });
+    });
+    return c;
+  }
+
+  function clearHot(){ gbody.querySelectorAll("td.drop-hot").forEach(function(td){ td.classList.remove("drop-hot"); }); }
+
+  function render(){
+    renderHead();
+    gbody.innerHTML="";
+    LANES.forEach(function(lane){
+      var tr=document.createElement("tr"); if(hidden[lane.id]) tr.className="lane-hidden";
+      var lc=document.createElement("td"); lc.className="lanecol lanelabel";
+      lc.innerHTML='<div class="nm"><span class="bar" style="background:'+lane.color+'"></span>'+lane.name+'</div><div class="role">'+lane.role+'</div>';
+      tr.appendChild(lc);
+      DAYS.forEach(function(d){
+        var td=document.createElement("td"); td.className="cell daycol"; td.dataset.lane=lane.id; td.dataset.day=d;
+
+        // 放置區（移動模式顯示）
+        var dz=document.createElement("button"); dz.className="dropzone"; dz.type="button";
+        dz.textContent="↓ 放到 12/"+d+"・"+laneShort(lane);
+        dz.addEventListener("click",function(){ if(moving) moveItem(moving,lane.id,d); });
+        td.appendChild(dz);
+
+        items.filter(function(it){return it.lane===lane.id && it.d===d;}).forEach(function(it){ td.appendChild(cardEl(it)); });
+
+        var add=document.createElement("button"); add.className="add"; add.textContent="＋ 新增";
+        add.addEventListener("click",function(){
+          var it={id:"u"+Date.now()+Math.floor(Math.random()*99),lane:lane.id,d:d,t:"新操作",nt:""};
+          items.push(it); save(); render();
+          setTimeout(function(){
+            var card=gbody.querySelector('[data-id="'+it.id+'"] .t');
+            if(card){ card.focus(); document.getSelection().selectAllChildren(card); }
+          },0);
+        });
+        td.appendChild(add);
+
+        // 原生拖曳放置
+        td.addEventListener("dragover",function(e){ if(dragId){ e.preventDefault(); e.dataTransfer.dropEffect="move"; td.classList.add("drop-hot"); } });
+        td.addEventListener("dragleave",function(){ td.classList.remove("drop-hot"); });
+        td.addEventListener("drop",function(e){ e.preventDefault(); td.classList.remove("drop-hot");
+          var id=dragId||(e.dataTransfer&&e.dataTransfer.getData("text/plain")); if(id) moveItem(id,lane.id,d); });
+
+        tr.appendChild(td);
+      });
+      gbody.appendChild(tr);
+    });
+    setEditable();
+    applyMoveState();
+    renderKpis();
+  }
+
+  function setEditable(){
+    document.getElementById("grid").classList.toggle("editing",editing);
+    gbody.querySelectorAll(".card .t,.card .nt").forEach(function(el){ el.contentEditable = editing?"true":"false"; });
+  }
+
+  function applyMoveState(){
+    document.body.classList.toggle("move-mode",!!moving);
+    gbody.querySelectorAll(".card").forEach(function(c){ c.classList.toggle("sel-move",c.dataset.id===moving); });
+    moveCancelBtn.hidden=!moving;
+  }
+
+  function renderKpis(){
+    var box=document.getElementById("kpis"); box.innerHTML="";
+    var total=items.length;
+    var tiles=[["total","總操作",total]];
+    LANES.forEach(function(l){ tiles.push([l.id,laneShort(l),items.filter(function(it){return it.lane===l.id;}).length]); });
+    tiles.forEach(function(t){
+      var d=document.createElement("div"); d.className="kpi"+(t[0]==="total"?" total":"");
+      d.innerHTML='<div class="n">'+t[2]+'</div><div class="l">'+t[1]+'</div>'; box.appendChild(d);
+    });
+  }
+
+  function renderLaneToggles(){
+    var box=document.getElementById("laneToggles"); box.innerHTML="";
+    LANES.forEach(function(l){
+      var b=document.createElement("button"); b.className="chip"; b.setAttribute("aria-pressed",hidden[l.id]?"false":"true");
+      b.innerHTML='<span class="dot" style="background:'+l.color+'"></span>'+laneShort(l);
+      b.addEventListener("click",function(){ hidden[l.id]=!hidden[l.id]; saveLanes(); b.setAttribute("aria-pressed",hidden[l.id]?"false":"true"); render(); });
+      box.appendChild(b);
+    });
+  }
+
+  moveCancelBtn.addEventListener("click",function(){ moving=null; applyMoveState(); });
+
+  document.getElementById("editBtn").addEventListener("click",function(){
+    editing=!editing; this.classList.toggle("on",editing); this.setAttribute("aria-pressed",editing?"true":"false");
+    document.getElementById("editHint").hidden=!editing; moving=null; render();
+  });
+  document.getElementById("resetBtn").addEventListener("click",function(){
+    items=seedItems(); hidden={}; moving=null; save(); saveLanes(); renderLaneToggles(); render();
+  });
+  document.getElementById("copyBtn").addEventListener("click",function(){
+    var lines=["泰奶社群作戰排程（12/2–12/20）"];
+    DAYS.forEach(function(d){
+      var day=items.filter(function(it){return it.d===d;});
+      if(!day.length) return;
+      lines.push("\n【12/"+d+"・"+phaseLabel(phaseOf(d))+"】");
+      LANES.forEach(function(l){
+        day.filter(function(it){return it.lane===l.id;}).forEach(function(it){
+          lines.push("  ["+laneShort(l)+"] "+it.t+(it.nt?("　— "+it.nt):""));
+        });
+      });
+    });
+    var txt=lines.join("\n"); var btn=this;
+    function ok(){ var o=btn.textContent; btn.textContent="已複製 ✓"; setTimeout(function(){btn.textContent=o;},1400); }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(ok).catch(function(){ fb(); });
+    } else fb();
+    function fb(){ var ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");ok();}catch(e){} document.body.removeChild(ta); }
+  });
+
+  renderLaneToggles(); render();
+})();
+</script>
