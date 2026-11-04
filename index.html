@@ -142,12 +142,14 @@
       <button class="btn cancel" id="moveCancel" hidden></button>
       <button class="btn" id="editBtn" aria-pressed="false"></button>
       <button class="btn" id="copyBtn"></button>
+      <button class="btn" id="exportBtn"></button>
       <button class="btn" id="resetBtn"></button>
     </div>
     <div class="phases">
       <span><b id="rhythm"></b></span>
       <span id="r1"></span><span id="r2"></span><span id="r3"></span>
       <span class="hint" id="moveHint"></span>
+      <span class="hint" id="srcNote"></span>
       <span class="hint" id="editHint" hidden></span>
     </div>
   </div>
@@ -166,8 +168,9 @@
   var UI={
     zh:{ docTitle:"泰奶社群作戰排程 · 三環五線", title:"泰奶社群作戰排程", x:"·三環五線",
       sub:"LAYA × ChaTraMue 手標泰奶聯名　|　12/2 – 12/20　|　三環五線 動態操作",
-      total:"總操作", edit:"編輯", copy:"複製排程", copied:"已複製 ✓", reset:"還原預設",
+      total:"總操作", edit:"編輯", copy:"複製排程", copied:"已複製 ✓", exportJson:"匯出 JSON", exported:"已複製 JSON ✓", reset:"還原預設",
       cancel:"取消移動", add:"＋ 新增", corner:"環 ＼ 日期",
+      srcNote:"正式版以 GitHub 原始檔為準；頁面「編輯」僅存本機草稿，需按「匯出 JSON」回傳才會進正式版。",
       rhythm:"節奏：", r1:"12/2 記者會（外·中環啟動）", r2:"12/3 上市（內環引爆·導購）", r3:"12/4–20 擴散（互相回收·長尾）",
       moveHint:"搬移：點卡片左上 ⇅ 再點目標日「放到這裡」；桌機也可直接拖曳卡片到其他格。",
       editHint:"編輯模式：點卡片文字可改，✕ 刪除，＋ 新增；變更自動存在本機。",
@@ -176,8 +179,9 @@
       wk:["日","一","二","三","四","五","六"], ph:{press:"記者會",launch:"上市",spread:"擴散"}, newItem:"新操作" },
     en:{ docTitle:"Thai Tea Social Ops · 3 Rings / 5 Lines", title:"Thai Tea Social Ops Schedule", x:"· 3 Rings / 5 Lines",
       sub:"LAYA × ChaTraMue Thai Milk Tea Collab　|　Dec 2 – Dec 20　|　3 Rings / 5 Lines live ops",
-      total:"Total", edit:"Edit", copy:"Copy", copied:"Copied ✓", reset:"Reset",
+      total:"Total", edit:"Edit", copy:"Copy", copied:"Copied ✓", exportJson:"Export JSON", exported:"JSON copied ✓", reset:"Reset",
       cancel:"Cancel move", add:"＋ Add", corner:"Lane ＼ Date",
+      srcNote:"Source of truth is the GitHub source file; in-page edits are local drafts — use “Export JSON” to send them back into the official version.",
       rhythm:"Rhythm: ", r1:"Dec 2 Press event (outer/mid rings start)", r2:"Dec 3 Launch (inner ring ignites · drive-to-buy)", r3:"Dec 4–20 Amplify (cross-recycle · long tail)",
       moveHint:"Move: tap ⇅ on a card, then tap a target day's “drop here”; on desktop just drag the card to another cell.",
       editHint:"Edit mode: tap card text to edit, ✕ to delete, ＋ to add; changes auto-save in this browser.",
@@ -266,7 +270,7 @@
 
   var gbody=document.getElementById("gbody"), ghead=document.getElementById("ghead");
   var moveCancelBtn=document.getElementById("moveCancel");
-  var editBtn=document.getElementById("editBtn"), copyBtn=document.getElementById("copyBtn"), resetBtn=document.getElementById("resetBtn");
+  var editBtn=document.getElementById("editBtn"), copyBtn=document.getElementById("copyBtn"), resetBtn=document.getElementById("resetBtn"), exportBtn=document.getElementById("exportBtn");
   var editing=false, moving=null, dragId=null;
 
   function applyChrome(){
@@ -282,6 +286,7 @@
     document.getElementById("moveHint").textContent = T.moveHint;
     document.getElementById("editHint").textContent = T.editHint;
     editBtn.textContent = T.edit; copyBtn.textContent = T.copy; resetBtn.textContent = T.reset; moveCancelBtn.textContent = T.cancel;
+    exportBtn.textContent = T.exportJson; document.getElementById("srcNote").textContent = T.srcNote;
     Array.prototype.forEach.call(document.querySelectorAll("#langtabs button"),function(b){
       b.setAttribute("aria-pressed", b.dataset.lang===lang ? "true":"false");
     });
@@ -439,6 +444,16 @@
     });
     var txt=lines.join("\n"), btn=this;
     function ok(){ var o=btn.textContent; btn.textContent=T.copied; setTimeout(function(){btn.textContent=o;},1400); }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(ok).catch(fb); } else fb();
+    function fb(){ var ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");ok();}catch(e){} document.body.removeChild(ta); }
+  });
+
+  exportBtn.addEventListener("click",function(){
+    var payload={ _note:"貼回對話給 Claude 以同步回 index.html 原始檔 / Paste to Claude to sync back into the source file",
+      schema:"layaThaiSchedule_v4", updatedAt:new Date().toISOString(), hiddenLanes:hidden, items:items };
+    var txt=JSON.stringify(payload,null,2), btn=this, T=UI[lang];
+    function ok(){ var o=btn.textContent; btn.textContent=T.exported; setTimeout(function(){btn.textContent=o;},1600); }
     if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(ok).catch(fb); } else fb();
     function fb(){ var ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
       document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");ok();}catch(e){} document.body.removeChild(ta); }
