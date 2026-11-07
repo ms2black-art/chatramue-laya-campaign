@@ -209,17 +209,16 @@
 
   // [lane, day, t_zh, nt_zh, t_en, nt_en]
   var SEED=[
-    ["official",2,"記者會現場限動直播","聯名正式公開貼文＋主視覺發布","Live press-event stories","Official collab reveal post ＋ key visual"],
-    ["official",2,"「泰誇張」梗預告","社群短梗啟動，預告明日上市","'泰誇張' pun teaser","Kick off social meme; tease tomorrow's debut"],
+    ["official",2,"記者會現場限動","聯名正式公開貼文＋主視覺發布","Live press-event stories","Official collab reveal post ＋ key visual"],
+    ["official",2,"「手標泰奶」預告","社群啟動，預告明日上市","'ChaTraMue Thai tea' teaser","Kick off social; tease tomorrow's debut"],
     ["thtw",2,"在台泰國學生會 拍攝","實測花絮預告：泰國人即將認證","Thai Student Assoc. shoot","BTS teaser: Thai authentication coming"],
     ["kol",2,"KOC 收到產品・預告","美食/旅遊 KOC 預告「明天上市」","KOCs receive product · teaser","Food/travel KOCs tease 'launch tomorrow'"],
     ["th",2,"手標泰方官宣","泰國官方社群：在台灣與拉亞聯名","ChaTraMue TH official announce","Thai official social: collab with Laya in Taiwan"],
     ["fp",2,"foodpanda 上架＋活動頁預告","聯名專區 banner；預告 12/3 免費兌換","foodpanda listing ＋ campaign-page teaser","Collab hub banner; tease 12/3 free redemption"],
-    ["kol",3,"娘娘 店內實測 Reels（主片）","最泰食評人認證，上市日上線","NangNang in-store test Reels (hero)","Top Thai-food critic verdict, live on launch day"],
+    ["kol",5,"娘娘 店內實測 Reels（主片）","最泰食評人認證，上市日上線","NangNang in-store test Reels (hero)","Top Thai-food critic verdict, live on launch day"],
     ["kol",3,"美食KOC 八款開箱","＋旅遊KOC「一口回曼谷」；限動接力","Food KOCs 8-item unboxing","＋travel KOCs 'one bite to Bangkok'; story relay"],
     ["thtw",3,"在台泰國學生會 實測認證（主片）","在台泰人盲測；發布「在台泰國人認證」章","Thai Student Assoc. taste test (hero)","Blind test by Thais in TW; 'Thai-in-Taiwan Certified' badge"],
     ["official",3,"上市洗版＋投票","泰奶豆漿 vs 拿鐵；Laya Now 導購","Launch-day feed blitz ＋ poll","Thai soy milk vs latte; drive to Laya Now"],
-    ["official",3,"「泰＿＿了」徵集啟動","泰好喝了／泰誇張了／泰上頭了","'Tai ___' fill-in campaign","Tai-tasty / Tai-wow / Tai-addictive"],
     ["th",3,"泰國社群驚奇投放","「台灣竟然喝得到正宗手標」＋泰方轉發","Thailand social 'surprise' push","'Taiwan has real ChaTraMue?!' ＋ TH reshares"],
     ["fp",3,"泰奶豆漿 免費兌換開跑","foodpanda 限量兌換；社群同步導客","Thai soy milk free redemption starts","foodpanda limited redemption; social drives traffic"],
     ["fp",3,"平台推播＋首頁曝光","pandapro 會員推播；泰奶聯名主題","Platform push ＋ homepage feature","pandapro member push; Thai-tea collab theme"],
@@ -230,35 +229,36 @@
     ["fp",4,"兌換熱況限動回收","「排隊兌換」實況 → 社群","Redemption-buzz stories","'Queueing to redeem' live → social"],
     ["kol",5,"旅遊KOC 場景化","「味蕾一秒到曼谷」","Travel KOC scene-setting","'Taste buds to Bangkok in a second'"],
     ["thtw",5,"台泰夫妻（KOC）家庭試吃","泰籍一方現場評點","Thai-TW couple (KOC) family taste test","Thai partner reviews on the spot"],
-    ["official",5,"門市「店員一句話」口碑啟動","好喝記得幫我分享；UGC 轉發","In-store 'one line from staff' WOM","'Tasty? please share'; UGC reshare"],
-    ["fp",5,"外送加碼・加價購","買聯名送泰奶／加價購；平台曝光","Delivery bonus · add-on buy","Buy collab get Thai tea / add-on; platform reach"],
     ["kol",6,"美食KOC 八款排名／獵奇吃法","","Food KOC 8-item ranking / novelty eats",""],
     ["official",6,"投票中期戰況限動","","Poll mid-point status stories",""],
     ["th",6,"曼谷 vs 台灣 對照梗","","Bangkok vs Taiwan compare meme",""],
-    ["fp",6,"衝外送早餐榜單","foodpanda 早餐類排行；截圖回收","Push delivery breakfast rankings","foodpanda breakfast chart; screenshot recycle"],
-    ["official",8,"公關回收貼文","「連泰國都在討論的台灣聯名」","PR recap post","'The TW collab even Thailand is talking about'"],
+    ["official",5,"公關回收貼文","「連泰國都在討論的台灣聯名」","PR recap post","'The TW collab even Thailand is talking about'"],
     ["th",8,"公關延伸稿","泰國社群熱議 → 台灣媒體","PR extension piece","Thai social buzz → TW media"],
     ["thtw",8,"泰籍達人／泰式餐廳老闆 點評","","Thai experts / Thai-restaurant owners review",""],
     ["kol",9,"旅遊線 KOC 第二波","隱藏吃法短影音","Travel-line KOC wave 2","Hidden ways-to-eat short video"],
     ["thtw",9,"「在台泰國人認證」章 二創徵集","","'Thai-in-TW Certified' badge remix call",""],
-    ["official",10,"八款精華 reels・投票結果","公布＋導購 Laya Now","8-item highlight reels · poll results","Reveal ＋ drive to Laya Now"],
+    ["official",10,"投票結果","公布＋導購 Laya Now","Poll results","Reveal ＋ drive to Laya Now"],
     ["kol",10,"美食KOC 長尾評測","","Food KOC long-tail reviews",""],
-    ["fp",10,"兌換中期成效・加碼預告","換量回報；平台優惠延伸","Redemption mid-results · bonus teaser","Redemption volume report; extend platform offer"],
+    ["fp",9,"泰奶生甜甜圈兌換開跑","foodpanda 限量兌換；社群同步導客","Thai-tea raised donut redemption starts","foodpanda limited redemption; social drives traffic"],
     ["thtw",12,"「帶爸媽視訊看台灣有手標」溫情片","","'Video-call parents: Taiwan has ChaTraMue' warm short",""],
     ["official",12,"感謝在台泰國朋友認證（官方文）","","Thank-you to Thai friends in TW (official post)",""],
-    ["fp",12,"pandapro 專屬優惠","會員回購；泰奶聯名主題","pandapro exclusive offer","Member repurchase; Thai-tea collab theme"],
-    ["official",15,"中期成效限動・導購延續","","Mid-term results stories · keep driving sales",""],
+    ["official",15,"連動素人發文","","Coordinated everyday-user posts",""],
     ["kol",15,"素人 UGC 精選轉發","","Curated everyday-user UGC reshare",""],
-    ["fp",15,"長尾外送優惠延續","","Long-tail delivery offer continues",""],
     ["kol",17,"口碑長尾（KOC 補發）","","WOM long tail (KOC follow-up posts)",""],
     ["th",17,"收尾回收／延伸公關","","Wrap-up recycle / extended PR",""],
-    ["official",20,"檔期中段回顧・年節前預告","","Campaign mid-recap · pre-holiday teaser",""],
     ["thtw",20,"家鄉味回顧短片","","'Taste of home' recap short",""],
-    ["fp",20,"檔期外送成效回顧","兌換／外送數據回收","Delivery performance recap","Redemption/delivery data wrap-up"]
+    ["fp",20,"檔期外送成效回顧","兌換／外送數據回收","Delivery performance recap","Redemption/delivery data wrap-up"],
+    ["fp",9,"平台推播＋首頁曝光","pandapro 會員推播；泰奶聯名主題","Platform push ＋ homepage feature","pandapro member push; Thai-tea collab theme"],
+    ["official",3,"八款精華 reels","","8-item highlight reels",""],
+    ["official",17,"連動KOC發文","","Coordinated KOC posts",""],
+    ["official",9,"連動KOC發文","","Coordinated KOC posts",""],
+    ["official",6,"連動KOC發文","","Coordinated KOC posts",""],
+    ["official",5,"連動娘娘＋KOC發文","","Coordinated NangNang ＋ KOC posts",""],
+    ["official",4,"連動KOC發文","","Coordinated KOC posts",""]
   ];
   function seedItems(){ return SEED.map(function(r,i){ return {id:"s"+i,lane:r[0],d:r[1],t:{zh:r[2],en:r[4]},nt:{zh:r[3]||"",en:r[5]||""}}; }); }
 
-  var KEY="layaThaiSchedule_v4", LKEY="layaThaiLanes_v4", GKEY="layaThaiLang";
+  var KEY="layaThaiSchedule_v5", LKEY="layaThaiLanes_v5", GKEY="layaThaiLang";
   var lang=loadLang();
   var items=load(), hidden=loadLanes();
   function loadLang(){ try{ var s=localStorage.getItem(GKEY); if(s==="zh"||s==="en") return s; }catch(e){} return "zh"; }
