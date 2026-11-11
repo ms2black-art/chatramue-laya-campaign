@@ -228,15 +228,13 @@
     ["th",4,"泰國網友反應截圖","回收至台灣社群與媒體","Thai netizen reaction screenshots","Recycle into TW social & media"],
     ["fp",4,"兌換熱況限動回收","「排隊兌換」實況 → 社群","Redemption-buzz stories","'Queueing to redeem' live → social"],
     ["kol",5,"旅遊KOC 場景化","「味蕾一秒到曼谷」","Travel KOC scene-setting","'Taste buds to Bangkok in a second'"],
-    ["thtw",5,"台泰夫妻（KOC）家庭試吃","泰籍一方現場評點","Thai-TW couple (KOC) family taste test","Thai partner reviews on the spot"],
     ["kol",6,"美食KOC 八款排名／獵奇吃法","","Food KOC 8-item ranking / novelty eats",""],
     ["official",6,"投票中期戰況限動","","Poll mid-point status stories",""],
     ["th",6,"曼谷 vs 台灣 對照梗","","Bangkok vs Taiwan compare meme",""],
     ["official",5,"公關回收貼文","「連泰國都在討論的台灣聯名」","PR recap post","'The TW collab even Thailand is talking about'"],
     ["th",8,"公關延伸稿","泰國社群熱議 → 台灣媒體","PR extension piece","Thai social buzz → TW media"],
-    ["thtw",8,"泰籍達人／泰式餐廳老闆 點評","","Thai experts / Thai-restaurant owners review",""],
+    ["thtw",8,"泰國旅遊達人 點評","","Thai travel influencer review",""],
     ["kol",9,"旅遊線 KOC 第二波","隱藏吃法短影音","Travel-line KOC wave 2","Hidden ways-to-eat short video"],
-    ["thtw",9,"「在台泰國人認證」章 二創徵集","","'Thai-in-TW Certified' badge remix call",""],
     ["official",10,"投票結果","公布＋導購 Laya Now","Poll results","Reveal ＋ drive to Laya Now"],
     ["kol",10,"美食KOC 長尾評測","","Food KOC long-tail reviews",""],
     ["fp",9,"泰奶生甜甜圈兌換開跑","foodpanda 限量兌換；社群同步導客","Thai-tea raised donut redemption starts","foodpanda limited redemption; social drives traffic"],
@@ -258,7 +256,7 @@
   ];
   function seedItems(){ return SEED.map(function(r,i){ return {id:"s"+i,lane:r[0],d:r[1],t:{zh:r[2],en:r[4]},nt:{zh:r[3]||"",en:r[5]||""}}; }); }
 
-  var KEY="layaThaiSchedule_v5", LKEY="layaThaiLanes_v5", GKEY="layaThaiLang";
+  var KEY="layaThaiSchedule_v6", LKEY="layaThaiLanes_v6", GKEY="layaThaiLang";
   var lang=loadLang();
   var items=load(), hidden=loadLanes();
   function loadLang(){ try{ var s=localStorage.getItem(GKEY); if(s==="zh"||s==="en") return s; }catch(e){} return "zh"; }
